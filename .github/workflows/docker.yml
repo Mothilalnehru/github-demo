@@ -5,24 +5,35 @@ on:
     branches:
       - main
 
+  workflow_dispatch:
+
 jobs:
   docker:
+    name: Build and Push Docker Image
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Source
+     
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
+     
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+    
       - name: Login to Docker Hub
         uses: docker/login-action@v3
         with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_PASSWORD }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
 
-      - name: Build Docker Image
-        run: |
-          docker build -t mothilalnehru/react-vite-app:latest .
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/github-demo:latest
 
-      - name: Push Docker Image
-        run: |
-          docker push mothilalnehru/react-vite-app:latest
+      - name: Logout from Docker Hub
+        run: docker logout
